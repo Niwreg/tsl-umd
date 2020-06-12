@@ -21,7 +21,7 @@ function tslumd(port) {
 	self.parser = packet.createParser();
 	self.server = dgram.createSocket('udp4');
 	self.parser.packet('tsl', 'b8{x1, b7 => address},b8{x2, b2 => brightness, b1 => tally4, b1 => tally3, b1 => tally2, b1 => tally1 }, b8[16] => label');
-	self.parser.packet('tslv5h', 'l16 => pbc, l8 => version, l8{b1 => stringtype, b1 => scontrol, x6}, l16 => screen, l16 => index, l16{b2 => RHTally, b2 => TXTTally, b2 => LHTally,b2=>brightness,x6,b1 =>controldata}, l16/l8 => label');
+	self.parser.packet('tslv5', 'l16 => pbc, l8 => version, l8{b1 => stringtype, b1 => scontrol, x6}, l16 => screen, l16 => index, l16{b2 => RHTally, b2 => TXTTally, b2 => LHTally,b2=>brightness,x6,b1 =>controldata}, l16/l8 => label');
 
 	self.server.on('error', (err) => {
 		debug('error',err);
