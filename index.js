@@ -13,11 +13,17 @@ var dgram        = require('dgram');
 var packet       = require('packet');
 
 
-function tslumd(port) {
+function tslumd(port,umdtslv) {
 
 	var self = this;
 
 	self.port = port;
+	if (typeof umdtslv !== "undefined") { //check if argument is passed
+        	self.umdtslv = umdtslv;
+    	} else {
+		self.umdtslv = v4;
+	}
+	
 	self.parser = packet.createParser();
 	self.server = dgram.createSocket('udp4');
 	self.parser.packet('tsl', 'b8{x1, b7 => address},b8{x2, b2 => brightness, b1 => tally4, b1 => tally3, b1 => tally2, b1 => tally1 }, b8[16] => label');
@@ -30,12 +36,22 @@ function tslumd(port) {
 	});
 
 	self.server.on('message', (msg, rinfo) => {
-		self.parser.extract("tsl", function (res) {
-			res.label = new Buffer(res.label).toString();
-			res.sender = rinfo.address;
-			self.emit('message', res);
-		});
-		self.parser.parse(msg);
+		if (self.umdtslv != 'v5') {
+			self.parser.extract("tsl", function (res) {
+				res.label = new Buffer(res.label).toString();
+				res.sender = rinfo.address;
+				self.emit('message', res);
+			});
+			self.parser.parse(msg);
+		} elseif (self.umdtslv == 'v5') {
+			self.parser.extract("tslv5", function (res) {
+				res.label = new Buffer(res.label).toString();
+				res.sender = rinfo.address;
+				self.emit('message', res);
+			});
+			self.parser.parse(msg);
+		}
+			
 	});
 
 	self.server.on('listening', () => {
